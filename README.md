@@ -69,6 +69,7 @@ method openTempFile fd content: hello via fd
 ## busctlで確認する例
 
 サーバ起動中に、別端末からD-Bus上のオブジェクトを確認できます。
+これは `org.freedesktop.DBus.Introspectable.Introspect` を呼び、対象オブジェクトが公開しているinterface、method、signalなどを表示するコマンドです。
 
 ```console
 busctl --user introspect com.example.DemoService /com/example/Demo
