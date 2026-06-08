@@ -1,15 +1,20 @@
 #include "demo-server-glue.h"
 
+#include <cerrno>
 #include <cstdint>
+#include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <sdbus-c++/sdbus-c++.h>
 #include <string>
+#include <unistd.h>
 #include <utility>
 
 namespace
 {
     constexpr const char *kServiceName = "com.example.DemoService";
     constexpr const char *kObjectPath = "/com/example/Demo";
+    constexpr const char *kTempFilePath = "/tmp/sdbus-cpp-demo-fd.txt";
 
     class DemoService final : public sdbus::AdaptorInterfaces<com::example::Demo_adaptor>
     {
@@ -42,6 +47,18 @@ namespace
             const auto sum = left + right;
             std::cout << "add(" << left << ", " << right << ") -> " << sum << std::endl;
             return sum;
+        }
+
+        sdbus::UnixFd openTempFile() override
+        {
+            const auto fd = ::open(kTempFilePath, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+            if (fd < 0)
+            {
+                throw sdbus::Error(sdbus::Error::Name{"com.example.Demo.Error.OpenFailed"}, std::strerror(errno));
+            }
+
+            std::cout << "openTempFile() -> " << kTempFilePath << " fd passed to client" << std::endl;
+            return sdbus::UnixFd(fd, sdbus::adopt_fd);
         }
 
         uint32_t echoCount_{0};

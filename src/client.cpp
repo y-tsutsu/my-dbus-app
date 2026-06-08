@@ -1,11 +1,15 @@
 #include "demo-client-glue.h"
 
+#include <array>
+#include <cerrno>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <sdbus-c++/sdbus-c++.h>
 #include <string>
 #include <thread>
+#include <unistd.h>
 #include <utility>
 
 namespace
@@ -48,6 +52,30 @@ int main(int argc, char **argv)
 
         const auto sum = client.add(20, 22);
         std::cout << "method add reply : 20 + 22 = " << sum << std::endl;
+
+        auto fd = client.openTempFile();
+        const std::string fdMessage = "hello via fd\n";
+        if (::write(fd.get(), fdMessage.data(), fdMessage.size()) < 0)
+        {
+            std::cerr << "fd write failed: " << std::strerror(errno) << std::endl;
+            return 1;
+        }
+
+        if (::lseek(fd.get(), 0, SEEK_SET) < 0)
+        {
+            std::cerr << "fd seek failed: " << std::strerror(errno) << std::endl;
+            return 1;
+        }
+
+        std::array<char, 256> buffer{};
+        const auto bytesRead = ::read(fd.get(), buffer.data(), buffer.size() - 1);
+        if (bytesRead < 0)
+        {
+            std::cerr << "fd read failed: " << std::strerror(errno) << std::endl;
+            return 1;
+        }
+
+        std::cout << "method openTempFile fd content: " << buffer.data();
 
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
     }
