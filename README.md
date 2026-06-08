@@ -24,7 +24,7 @@
 Debian/Ubuntu系では、環境によって次のようなパッケージが必要です。
 
 ```console
-sudo apt install cmake g++ libsystemd-dev libsdbus-c++-dev libsdbus-c++-bin
+$ sudo apt install cmake g++ libsystemd-dev libsdbus-c++-dev libsdbus-c++-bin
 ```
 
 ディストリビューションによって `sdbus-c++-xml2cpp` を含むパッケージ名は異なることがあります。
@@ -32,8 +32,8 @@ sudo apt install cmake g++ libsystemd-dev libsdbus-c++-dev libsdbus-c++-bin
 ## ビルド
 
 ```console
-cmake -S . -B build
-cmake --build build
+$ cmake -S . -B build
+$ cmake --build build
 ```
 
 ## 実行
@@ -43,13 +43,13 @@ cmake --build build
 1つ目でサーバを起動します。
 
 ```console
-./build/demo-server
+$ ./build/demo-server
 ```
 
 2つ目でクライアントを実行します。
 
 ```console
-./build/demo-client "hello dbus"
+$ ./build/demo-client "hello dbus"
 ```
 
 クライアントは `echo` と `add` メソッドを呼びます。サーバは `echo` の処理中に `echoed` シグナルを送ります。
@@ -72,12 +72,12 @@ method openTempFile fd content: hello via fd
 これは `org.freedesktop.DBus.Introspectable.Introspect` を呼び、対象オブジェクトが公開しているinterface、method、signalなどを表示するコマンドです。
 
 ```console
-busctl --user introspect com.example.DemoService /com/example/Demo
+$ busctl --user introspect com.example.DemoService /com/example/Demo
 ```
 
 メソッド呼び出しもできます。
 
 ```console
-busctl --user call com.example.DemoService /com/example/Demo com.example.Demo echo s "from busctl"
-busctl --user call com.example.DemoService /com/example/Demo com.example.Demo add ii 1 2
+$ busctl --user call com.example.DemoService /com/example/Demo com.example.Demo echo s "from busctl"
+$ busctl --user call com.example.DemoService /com/example/Demo com.example.Demo add ii 1 2
 ```
