@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node name="/com/example/Demo">
+    <interface name="com.example.Demo">
+        <method name="echo">
+            <arg type="s" name="message" direction="in"/>
+            <arg type="s" name="reply" direction="out"/>
+        </method>
+
+        <method name="add">
+            <arg type="i" name="left" direction="in"/>
+            <arg type="i" name="right" direction="in"/>
+            <arg type="i" name="sum" direction="out"/>
+        </method>
+
+        <signal name="echoed">
+            <arg type="s" name="message"/>
+            <arg type="u" name="callCount"/>
+        </signal>
+    </interface>
+</node>
