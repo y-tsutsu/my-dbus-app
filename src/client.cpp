@@ -14,8 +14,8 @@
 
 namespace
 {
-    constexpr const char *kServiceName = "com.example.DemoService";
-    constexpr const char *kObjectPath = "/com/example/Demo";
+    constexpr const char *SERVICE_NAME = "com.example.DemoService";
+    constexpr const char *OBJECT_PATH = "/com/example/Demo";
 
     class DemoClient final : public sdbus::ProxyInterfaces<com::example::Demo_proxy>
     {
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 
     try
     {
-        DemoClient client(sdbus::ServiceName{kServiceName}, sdbus::ObjectPath{kObjectPath});
+        DemoClient client(sdbus::ServiceName{SERVICE_NAME}, sdbus::ObjectPath{OBJECT_PATH});
 
         const auto reply = client.echo(message);
         std::cout << "method echo reply: " << reply << std::endl;

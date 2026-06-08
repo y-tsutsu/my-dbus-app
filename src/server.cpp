@@ -12,9 +12,9 @@
 
 namespace
 {
-    constexpr const char *kServiceName = "com.example.DemoService";
-    constexpr const char *kObjectPath = "/com/example/Demo";
-    constexpr const char *kTempFilePath = "/tmp/sdbus-cpp-demo-fd.txt";
+    constexpr const char *SERVICE_NAME = "com.example.DemoService";
+    constexpr const char *OBJECT_PATH = "/com/example/Demo";
+    constexpr const char *TEMP_FILE_PATH = "/tmp/sdbus-cpp-demo-fd.txt";
 
     class DemoService final : public sdbus::AdaptorInterfaces<com::example::Demo_adaptor>
     {
@@ -51,13 +51,13 @@ namespace
 
         sdbus::UnixFd openTempFile() override
         {
-            const auto fd = ::open(kTempFilePath, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+            const auto fd = ::open(TEMP_FILE_PATH, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
             if (fd < 0)
             {
                 throw sdbus::Error(sdbus::Error::Name{"com.example.Demo.Error.OpenFailed"}, std::strerror(errno));
             }
 
-            std::cout << "openTempFile() -> " << kTempFilePath << " fd passed to client" << std::endl;
+            std::cout << "openTempFile() -> " << TEMP_FILE_PATH << " fd passed to client" << std::endl;
             return sdbus::UnixFd(fd, sdbus::adopt_fd);
         }
 
@@ -69,12 +69,12 @@ int main()
 {
     try
     {
-        auto connection = sdbus::createSessionBusConnection(sdbus::ServiceName{kServiceName});
-        DemoService service(*connection, sdbus::ObjectPath{kObjectPath});
+        auto connection = sdbus::createSessionBusConnection(sdbus::ServiceName{SERVICE_NAME});
+        DemoService service(*connection, sdbus::ObjectPath{OBJECT_PATH});
 
         std::cout << "D-Bus demo service is running." << std::endl;
-        std::cout << "  service: " << kServiceName << std::endl;
-        std::cout << "  object : " << kObjectPath << std::endl;
+        std::cout << "  service: " << SERVICE_NAME << std::endl;
+        std::cout << "  object : " << OBJECT_PATH << std::endl;
 
         connection->enterEventLoop();
     }
