@@ -1,4 +1,5 @@
-#include "demo-client-glue.h"
+#include "demo-adaptor-glue.h"
+#include "demo-proxy-glue.h"
 
 #include <array>
 #include <cerrno>
@@ -16,12 +17,36 @@ namespace
 {
     constexpr const char *SERVICE_NAME = "com.example.DemoService";
     constexpr const char *OBJECT_PATH = "/com/example/Demo";
+    constexpr const char *CALLBACK_OBJECT_PATH = "/com/example/DemoCallback";
+
+    class DemoCallback final : public sdbus::AdaptorInterfaces<com::example::DemoCallback_adaptor>
+    {
+    public:
+        DemoCallback(sdbus::IConnection &connection, sdbus::ObjectPath objectPath)
+            : AdaptorInterfaces(connection, std::move(objectPath))
+        {
+            registerAdaptor();
+        }
+
+        ~DemoCallback()
+        {
+            unregisterAdaptor();
+        }
+
+    private:
+        std::string onServerMessage(const std::string &message) override
+        {
+            const auto reply = "client callback received: " + message;
+            std::cout << "callback onServerMessage: " << message << std::endl;
+            return reply;
+        }
+    };
 
     class DemoClient final : public sdbus::ProxyInterfaces<com::example::Demo_proxy>
     {
     public:
-        DemoClient(sdbus::ServiceName destination, sdbus::ObjectPath objectPath)
-            : ProxyInterfaces(std::move(destination), std::move(objectPath))
+        DemoClient(sdbus::IConnection &connection, sdbus::ServiceName destination, sdbus::ObjectPath objectPath)
+            : ProxyInterfaces(connection, std::move(destination), std::move(objectPath))
         {
             registerProxy();
         }
@@ -45,7 +70,11 @@ int main(int argc, char **argv)
 
     try
     {
-        DemoClient client(sdbus::ServiceName{SERVICE_NAME}, sdbus::ObjectPath{OBJECT_PATH});
+        auto connection = sdbus::createSessionBusConnection();
+        DemoCallback callback(*connection, sdbus::ObjectPath{CALLBACK_OBJECT_PATH});
+        connection->enterEventLoopAsync();
+
+        DemoClient client(*connection, sdbus::ServiceName{SERVICE_NAME}, sdbus::ObjectPath{OBJECT_PATH});
 
         const auto reply = client.echo(message);
         std::cout << "method echo reply: " << reply << std::endl;
@@ -76,6 +105,9 @@ int main(int argc, char **argv)
         }
 
         std::cout << "method openTempFile fd content: " << buffer.data();
+
+        client.registerCallback(sdbus::ObjectPath{CALLBACK_OBJECT_PATH});
+        std::cout << "method registerCallback called; waiting for server callback..." << std::endl;
 
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
     }

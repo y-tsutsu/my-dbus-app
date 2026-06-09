@@ -24,29 +24,29 @@ endif()
 
 set(DBUS_XML ${CMAKE_CURRENT_SOURCE_DIR}/dbus/com.example.Demo.xml)
 set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
-set(SERVER_GLUE ${GENERATED_DIR}/demo-server-glue.h)
-set(CLIENT_GLUE ${GENERATED_DIR}/demo-client-glue.h)
+set(ADAPTOR_GLUE ${GENERATED_DIR}/demo-adaptor-glue.h)
+set(PROXY_GLUE ${GENERATED_DIR}/demo-proxy-glue.h)
 
 file(MAKE_DIRECTORY ${GENERATED_DIR})
 
 add_custom_command(
-    OUTPUT ${SERVER_GLUE} ${CLIENT_GLUE}
+    OUTPUT ${ADAPTOR_GLUE} ${PROXY_GLUE}
     COMMAND ${SDBUSCPP_XML2CPP} ${DBUS_XML}
-            --adaptor=${SERVER_GLUE}
-            --proxy=${CLIENT_GLUE}
+            --adaptor=${ADAPTOR_GLUE}
+            --proxy=${PROXY_GLUE}
     DEPENDS ${DBUS_XML}
     COMMENT "Generating sdbus-c++ bindings from ${DBUS_XML}"
     VERBATIM
 )
 
-add_custom_target(dbus_glue DEPENDS ${SERVER_GLUE} ${CLIENT_GLUE})
+add_custom_target(dbus_glue DEPENDS ${ADAPTOR_GLUE} ${PROXY_GLUE})
 
-add_executable(demo-server src/server.cpp ${SERVER_GLUE})
+add_executable(demo-server src/server.cpp ${ADAPTOR_GLUE} ${PROXY_GLUE})
 target_include_directories(demo-server PRIVATE ${GENERATED_DIR})
 target_link_libraries(demo-server PRIVATE ${SDBUSCPP_TARGET})
 add_dependencies(demo-server dbus_glue)
 
-add_executable(demo-client src/client.cpp ${CLIENT_GLUE})
+add_executable(demo-client src/client.cpp ${PROXY_GLUE} ${ADAPTOR_GLUE})
 target_include_directories(demo-client PRIVATE ${GENERATED_DIR})
 target_link_libraries(demo-client PRIVATE ${SDBUSCPP_TARGET})
 add_dependencies(demo-client dbus_glue)

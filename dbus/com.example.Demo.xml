@@ -16,9 +16,20 @@
             <arg type="h" name="fd" direction="out"/>
         </method>
 
+        <method name="registerCallback">
+            <arg type="o" name="callbackPath" direction="in"/>
+        </method>
+
         <signal name="echoed">
             <arg type="s" name="message"/>
             <arg type="u" name="callCount"/>
         </signal>
+    </interface>
+
+    <interface name="com.example.DemoCallback">
+        <method name="onServerMessage">
+            <arg type="s" name="message" direction="in"/>
+            <arg type="s" name="reply" direction="out"/>
+        </method>
     </interface>
 </node>
